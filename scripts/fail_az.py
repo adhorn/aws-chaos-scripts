@@ -152,7 +152,7 @@ def rollback(ec2_client, save_for_rollback):
         )
 
 
-def delete_chaos_nac(ec2_client, chaos_nacl_id):
+def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     # delete the Chaos NACL
     ec2_client.delete_network_acl(
         NetworkAclId=chaos_nacl_id
@@ -169,7 +169,7 @@ def run(region, az_name, vpc_id, log_level='INFO'):
     save_for_rollback = apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id)
     time.sleep(60)
     rollback(ec2_client, save_for_rollback)
-    delete_chaos_nac(ec2_client, chaos_nacl_id)
+    delete_chaos_nacl(ec2_client, chaos_nacl_id)
 
 
 def entry_point():
