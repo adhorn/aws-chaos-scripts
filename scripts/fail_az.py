@@ -35,6 +35,8 @@ def get_arguments():
                         help='The VPC ID of choice')
     parser.add_argument('--az-name', type=str, default='eu-west-3a',
                         help='The name of the availability zone to blackout')
+    parser.add_argument('--duration', type=int, default=60,
+                        help='The duration, in seconds, of the blackout')
     return parser.parse_args()
 
 
@@ -159,7 +161,7 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     )
 
 
-def run(region, az_name, vpc_id, log_level='INFO'):
+def run(region, az_name, vpc_id, duration, log_level='INFO'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
@@ -167,11 +169,11 @@ def run(region, az_name, vpc_id, log_level='INFO'):
     chaos_nacl_id = create_chaos_nacl(ec2_client, vpc_id)
     nacl_ids = get_subnets_to_chaos(ec2_client, vpc_id, az_name)
     save_for_rollback = apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id)
-    time.sleep(60)
+    time.sleep(duration)
     rollback(ec2_client, save_for_rollback)
     delete_chaos_nacl(ec2_client, chaos_nacl_id)
 
 
 def entry_point():
     args = get_arguments()
-    run(args.region, args.az_name, args.vpc_id, args.log_level)
+    run(args.region, args.az_name, args.vpc_id, args.duration, args.log_level)

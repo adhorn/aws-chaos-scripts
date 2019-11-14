@@ -1,5 +1,9 @@
 ## About
-Python script to simulate the lose of an Availability Zone (AZ) in an AWS region.
+Collection of python scripts to inject failure in the AWS Infrastructure
+
+script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
+script-kill-random: randomly kill instances in a particular AZ, VPC. 
+
 
 ## Building and using
 
@@ -25,7 +29,7 @@ Python script to simulate the lose of an Availability Zone (AZ) in an AWS region
 1. Run the script with its console script:
 
    ```shell
-   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a
+   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60
    ```
 
 [wheel]: http://pythonwheels.com
