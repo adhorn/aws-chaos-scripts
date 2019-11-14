@@ -186,7 +186,8 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
 
 def confirm_choice():
     logger = logging.getLogger(__name__)
-    confirm = input("!!WARNING!! [c]Confirm or [a]Abort Rebooting Database: ")
+    confirm = input(
+        "!!WARNING!! [c]Confirm or [a]Abort Failing over the database: ")
     if confirm != 'c' and confirm != 'a':
         print("\n Invalid Option. Please Enter a Valid Option.")
         return confirm_choice()
