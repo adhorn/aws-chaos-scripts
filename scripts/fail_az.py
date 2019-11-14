@@ -1,8 +1,9 @@
 """
 Script to simulate the lose of an AZ in an AWS Region
-Uses Network ACL with deny all traffic
-Rollback to originial state
-Deletes all created resources
+It is using Network ACL with deny all traffic
+The script will Rollback to the originial state
+And delete all created resources
+Optional: it can also failover the masteRDS database.
 """
 import argparse
 import logging
