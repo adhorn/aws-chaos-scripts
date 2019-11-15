@@ -1,3 +1,13 @@
+## Disclaimer
+
+⚠️USE AT YOUR OWN RISK⚠️
+
+Using these scripts may create an unreasonable risk. If you choose to use the scripts provided here in your own activities, you do so at your own risk.
+None of the authors or contributors, or anyone else connected with these scripts, in any way whatsoever, can be responsible for your use of the scripts contained in this repository. 
+Use these scripts only if you understand what the code does
+
+
+
 ## About
 Collection of python scripts to inject failure in the AWS Infrastructure
 
