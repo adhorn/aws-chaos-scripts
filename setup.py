@@ -6,7 +6,7 @@ requirements = [
 ]
 
 setup(
-    name='fail_aws_az',
+    name='chaos_aws',
     version='1.0.0',
     author='Adrian Hornsby',
     author_email='adhorn@amazon.com',
@@ -19,11 +19,12 @@ setup(
         "Programming Language :: Python :: 3 :: Only"
     ],
     keywords='chaos engineering aws',
-    description='Python script to simulate the lose of an availability zone in an AWS region.',
+    description='Python scripts to do chaos engineering.',
     packages=['scripts'],
     entry_points={
         'console_scripts': [
             'script-fail-az=scripts.fail_az:entry_point',
+            'script-stop-instance=scripts.stop_random_instance:entry_point',
         ],
     },
     install_requires=requirements

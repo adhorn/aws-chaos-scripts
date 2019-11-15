@@ -126,7 +126,8 @@ def get_subnets_to_chaos(ec2_client, vpc_id, az_name):
     for nacl in network_acls:
         for nacl_ass in nacl['Associations']:
             if nacl_ass['SubnetId'] in subnets_to_chaos:
-                nacl_ass_id, nacl_id = nacl_ass['NetworkAclAssociationId'], nacl_ass['NetworkAclId']
+                nacl_ass_id, nacl_id = nacl_ass[
+                    'NetworkAclAssociationId'], nacl_ass['NetworkAclId']
                 nacl_ids.append((nacl_ass_id, nacl_id))
 
     return nacl_ids
@@ -134,7 +135,7 @@ def get_subnets_to_chaos(ec2_client, vpc_id, az_name):
 
 def apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id):
     logger = logging.getLogger(__name__)
-    logger.info('save original config & apply new chaos config')
+    logger.info('Saving original config & applying new chaos config')
     save_for_rollback = []
     # Modify the association of the subnets_to_chaos with the Chaos NetworkACL
     for nacl_ass_id, nacl_id in nacl_ids:
@@ -146,22 +147,39 @@ def apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id):
     return save_for_rollback
 
 
+def confirm_choice():
+    logger = logging.getLogger(__name__)
+    confirm = input(
+        "!!WARNING!! [c]Confirm or [a]Abort Failing over the database: ")
+    if confirm != 'c' and confirm != 'a':
+        print("\n Invalid Option. Please Enter a Valid Option.")
+        return confirm_choice()
+    logger.info('Selection: %s', confirm)
+    return confirm
+
+
 def force_failover_rds(rds_client, vpc_id, az_name):
     logger = logging.getLogger(__name__)
     # Find RDS master instances within the AZ
     rds_dbs = rds_client.describe_db_instances()
     for rds_db in rds_dbs['DBInstances']:
         if rds_db['DBSubnetGroup']['VpcId'] == vpc_id:
-            logger.info(
-                'Database found in VPC: %s ', rds_db['DBInstanceIdentifier'])
-            # if RDS master is multi-az and in blackholed AZ
-            # force reboot with failover
             if rds_db['AvailabilityZone'] == az_name and rds_db['MultiAZ']:
-                logger.info('Force reboot/failover')
-                rds_client.reboot_db_instance(
-                    DBInstanceIdentifier=rds_db['DBInstanceIdentifier'],
-                    ForceFailover=True
+                logger.info(
+                    'Database found in VPC: %s and AZ: %s', rds_db[
+                        'DBInstanceIdentifier'], rds_db['AvailabilityZone']
                 )
+                # if RDS master is multi-az and in blackholed AZ
+                # force reboot with failover
+                confirm = confirm_choice()
+                if confirm == 'c':
+                    logger.info('Force reboot/failover')
+                    rds_client.reboot_db_instance(
+                        DBInstanceIdentifier=rds_db['DBInstanceIdentifier'],
+                        ForceFailover=True
+                    )
+                else:
+                    logger.info('Failover aborted')
 
 
 def rollback(ec2_client, save_for_rollback):
@@ -184,17 +202,6 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     )
 
 
-def confirm_choice():
-    logger = logging.getLogger(__name__)
-    confirm = input(
-        "!!WARNING!! [c]Confirm or [a]Abort Failing over the database: ")
-    if confirm != 'c' and confirm != 'a':
-        print("\n Invalid Option. Please Enter a Valid Option.")
-        return confirm_choice()
-    logger.info('Selection: %s', confirm)
-    return confirm
-
-
 def run(region, az_name, vpc_id, duration, failover_rds, log_level='INFO'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
@@ -205,12 +212,8 @@ def run(region, az_name, vpc_id, duration, failover_rds, log_level='INFO'):
     save_for_rollback = apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id)
 
     if failover_rds:
-        confirm = confirm_choice()
-        if confirm == 'c':
-            rds_client = boto3.client('rds', region_name=region)
-            force_failover_rds(rds_client, vpc_id, az_name)
-        else:
-            pass
+        rds_client = boto3.client('rds', region_name=region)
+        force_failover_rds(rds_client, vpc_id, az_name)
 
     time.sleep(duration)
     rollback(ec2_client, save_for_rollback)
@@ -227,3 +230,7 @@ def entry_point():
         args.failover_rds,
         args.log_level
     )
+
+
+if __name__ == '__main__':
+    entry_point()
