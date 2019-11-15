@@ -1,8 +1,8 @@
 ## About
 Collection of python scripts to inject failure in the AWS Infrastructure
 
-script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
-script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+    script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
+    script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
 
 ## Building and using for production
 
