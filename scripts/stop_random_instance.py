@@ -6,6 +6,7 @@ import argparse
 import logging
 import boto3
 import random
+import time
 
 from pythonjsonlogger import jsonlogger
 
@@ -35,6 +36,8 @@ def get_arguments():
                         help='The name of the tag')
     parser.add_argument('--tag-value', type=str, default='chaos-ready',
                         help='The value of the tag')
+    parser.add_argument('--duration', type=int, default=60,
+                        help='Duration, in seconds, before restarting the instance')
     return parser.parse_args()
 
 
@@ -72,20 +75,35 @@ def stop_random_instance(ec2_client, az_name, tag_name, tag_value):
     if len(instance_list) > 0:
         selected_instance = random.choice(instance_list)
         logger.info("Randomly selected %s", selected_instance)
-        response = ec2_client.stop_instances(InstanceIds=[selected_instance])
-        return response
+        ec2_client.stop_instances(
+            InstanceIds=[selected_instance]
+        )
+        return selected_instance
     else:
         logger.info(
             "No instance in running state in %s with tag %s=%s",
             az_name, tag_name, tag_value)
 
 
-def run(region, az_name, tag_name, tag_value, log_level='INFO'):
+def rollback(ec2_client, instance_id):
+    logger = logging.getLogger(__name__)
+    logger.info('Restarting the instance %s', instance_id)
+    ec2_client.start_instances(
+            InstanceIds=[instance_id]
+    )
+
+
+def run(region, az_name, tag_name, tag_value, duration, log_level='INFO'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
     ec2_client = boto3.client('ec2', region_name=region)
-    stop_random_instance(ec2_client, az_name, tag_name, tag_value)
+    instance_id = stop_random_instance(
+        ec2_client, az_name, tag_name, tag_value)
+
+    if instance_id and duration:
+        time.sleep(duration)
+        rollback(ec2_client, instance_id)
 
 
 def entry_point():
@@ -95,6 +113,7 @@ def entry_point():
         args.az_name,
         args.tag_name,
         args.tag_value,
+        args.duration,
         args.log_level
     )
 
