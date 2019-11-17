@@ -36,7 +36,7 @@ def get_arguments():
                         help='The name of the tag')
     parser.add_argument('--tag-value', type=str, default='chaos-ready',
                         help='The value of the tag')
-    parser.add_argument('--duration', type=int, default=60,
+    parser.add_argument('--duration', type=int,
                         help='Duration, in seconds, before restarting the instance')
     return parser.parse_args()
 
