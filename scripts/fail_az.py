@@ -1,9 +1,9 @@
 """
 Script to simulate the lose of an AZ in an AWS Region
 It is using Network ACL with deny all traffic
-The script will Rollback to the originial state
+The script will rollback to the original state
 And delete all created resources
-Optional: it can also failover the masteRDS database.
+Optional: it can also failover the RDS database.
 """
 import argparse
 import logging
@@ -26,7 +26,7 @@ def setup_logging(log_level):
 
 def get_arguments():
     parser = argparse.ArgumentParser(
-        description='Script to associate subnet(s) with a Chaos NACL that deny ALL Ingress and Egress traffic - Simulation AZ failure',
+        description='Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL Ingress and Egress traffic - blackhole',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')

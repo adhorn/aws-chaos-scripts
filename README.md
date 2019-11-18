@@ -7,12 +7,59 @@ None of the authors or contributors, or anyone else connected with these scripts
 Use these scripts only if you understand what the code does
 
 
+## Collection of python scripts to inject failure in the AWS Infrastructure.
 
-## About
-Collection of python scripts to inject failure in the AWS Infrastructure
+1. script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
 
-    script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
-    script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+     ```shell
+        ❯ script-fail-az --help
+        usage: script-fail-az [-h] [--log-level LOG_LEVEL] [--region REGION]
+                            [--vpc-id VPC_ID] [--az-name AZ_NAME]
+                            [--duration DURATION] [--failover-rds FAILOVER_RDS]
+
+        Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL
+        Ingress and Egress traffic - blackhole
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        --log-level LOG_LEVEL
+                                Python log level. INFO, DEBUG, etc. (default: INFO)
+        --region REGION       The AWS region of choice (default: eu-west-3)
+        --vpc-id VPC_ID       The VPC ID of choice (default: vpc-2719dc4e)
+        --az-name AZ_NAME     The name of the availability zone to blackout
+                                (default: eu-west-3a)
+        --duration DURATION   The duration, in seconds, of the blackout (default:
+                                60)
+        --failover-rds FAILOVER_RDS
+                                Failover RDS master in the blackout subnet (default:
+                                False)
+    ```
+
+
+
+2. script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+
+    ```shell
+        ❯ script-stop-instance --help
+        usage: script-stop-instance [-h] [--log-level LOG_LEVEL] [--region REGION]
+                                    [--az-name AZ_NAME] [--tag-name TAG_NAME]
+                                    [--tag-value TAG_VALUE] [--duration DURATION]
+
+        Script to randomly stop instance in AZ filtered by tag
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        --log-level LOG_LEVEL
+                              Python log level. INFO, DEBUG, etc. (default: INFO)
+        --region REGION       The AWS region of choice (default: eu-west-3)
+        --az-name AZ_NAME     The name of the availability zone to blackout
+                                (default: eu-west-3a)
+        --tag-name TAG_NAME   The name of the tag (default: SSMTag)
+        --tag-value TAG_VALUE
+                                The value of the tag (default: chaos-ready)
+        --duration DURATION   Duration, in seconds, before restarting the instance
+                                (default: None)
+    ```
 
 ## Building and using for production
 
