@@ -13,24 +13,30 @@ Use these scripts only if you understand what the code does
 
      ```shell
         ❯ script-fail-az --help
-        usage: script-fail-az [-h] [--log-level LOG_LEVEL] [--region REGION]
-                            [--vpc-id VPC_ID] [--az-name AZ_NAME]
-                            [--duration DURATION] [--failover-rds FAILOVER_RDS]
+        usage: fail_az.py [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
+                        [--duration DURATION] [--failover-rds FAILOVER_RDS]
+                        [--failover-elasticache FAILOVER_ELASTICACHE]
+                        [--log-level LOG_LEVEL]
 
         Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL
         Ingress and Egress traffic - blackhole
 
         optional arguments:
         -h, --help            show this help message and exit
-        --log-level LOG_LEVEL Python log level. INFO, DEBUG, etc. (default: INFO)
-        --region REGION       The AWS region of choice (default: eu-west-3)
-        --vpc-id VPC_ID       The VPC ID of choice (default: vpc-2719dc4e)
+        --region REGION       The AWS region of choice (default: None)
+        --vpc-id VPC_ID       The VPC ID of choice (default: None)
         --az-name AZ_NAME     The name of the availability zone to blackout
-                                (default: eu-west-3a)
+                                (default: None)
         --duration DURATION   The duration, in seconds, of the blackout (default:
                                 60)
-        --failover-rds FAILOVER_RDS Failover RDS master in the blackout subnet (default:
-                                False)
+        --failover-rds FAILOVER_RDS
+                                Failover RDS if master in the blackout subnet
+                                (default: False)
+        --failover-elasticache FAILOVER_ELASTICACHE
+                                Failover Elasticache if primary in the blackout subnet
+                                (default: False)
+        --log-level LOG_LEVEL
+                                Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
 
@@ -39,7 +45,7 @@ Use these scripts only if you understand what the code does
 
     ```shell
         ❯ script-stop-instance --help
-        usage: script-stop-instance [-h] [--log-level LOG_LEVEL] [--region REGION]
+        usage: stop_random_instance.py [-h] [--log-level LOG_LEVEL] [--region REGION]
                                     [--az-name AZ_NAME] [--tag-name TAG_NAME]
                                     [--tag-value TAG_VALUE] [--duration DURATION]
 
@@ -47,12 +53,14 @@ Use these scripts only if you understand what the code does
 
         optional arguments:
         -h, --help            show this help message and exit
-        --log-level LOG_LEVEL Python log level. INFO, DEBUG, etc. (default: INFO)
+        --log-level LOG_LEVEL
+                                Python log level. INFO, DEBUG, etc. (default: INFO)
         --region REGION       The AWS region of choice (default: eu-west-3)
         --az-name AZ_NAME     The name of the availability zone to blackout
                                 (default: eu-west-3a)
         --tag-name TAG_NAME   The name of the tag (default: SSMTag)
-        --tag-value TAG_VALUE The value of the tag (default: chaos-ready)
+        --tag-value TAG_VALUE
+                                The value of the tag (default: chaos-ready)
         --duration DURATION   Duration, in seconds, before restarting the instance
                                 (default: None)
     ```
