@@ -13,10 +13,10 @@ Use these scripts only if you understand what the code does
 
      ```shell
         ❯ script-fail-az --help
-        usage: fail_az.py [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
-                        [--duration DURATION] [--failover-rds FAILOVER_RDS]
-                        [--failover-elasticache FAILOVER_ELASTICACHE]
-                        [--log-level LOG_LEVEL]
+        usage: script-fail-az   [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
+                                [--duration DURATION] [--failover-rds FAILOVER_RDS]
+                                [--failover-elasticache FAILOVER_ELASTICACHE]
+                                [--log-level LOG_LEVEL]
 
         Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL
         Ingress and Egress traffic - blackhole
@@ -45,7 +45,7 @@ Use these scripts only if you understand what the code does
 
     ```shell
         ❯ script-stop-instance --help
-        usage: stop_random_instance.py [-h] [--log-level LOG_LEVEL] [--region REGION]
+        usage: script-stop-instance [-h] [--log-level LOG_LEVEL] [--region REGION]
                                     [--az-name AZ_NAME] [--tag-name TAG_NAME]
                                     [--tag-value TAG_VALUE] [--duration DURATION]
 
