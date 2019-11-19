@@ -28,18 +28,20 @@ def get_arguments():
     parser = argparse.ArgumentParser(
         description='Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL Ingress and Egress traffic - blackhole',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--log-level', type=str, default='INFO',
-                        help='Python log level. INFO, DEBUG, etc.')
-    parser.add_argument('--region', type=str, default='eu-west-3',
+    parser.add_argument('--region', type=str, required=True,
                         help='The AWS region of choice')
-    parser.add_argument('--vpc-id', type=str, default='vpc-2719dc4e',
+    parser.add_argument('--vpc-id', type=str, required=True,
                         help='The VPC ID of choice')
-    parser.add_argument('--az-name', type=str, default='eu-west-3a',
+    parser.add_argument('--az-name', type=str, required=True,
                         help='The name of the availability zone to blackout')
     parser.add_argument('--duration', type=int, default=60,
                         help='The duration, in seconds, of the blackout')
     parser.add_argument('--failover-rds', type=bool, default=False,
-                        help='Failover RDS master in the blackout subnet')
+                        help='Failover RDS if master in the blackout subnet')
+    parser.add_argument('--failover-elasticache', type=bool, default=False,
+                        help='Failover Elasticache if primary in the blackout subnet')
+    parser.add_argument('--log-level', type=str, default='INFO',
+                        help='Python log level. INFO, DEBUG, etc.')
     return parser.parse_args()
 
 
@@ -150,7 +152,7 @@ def apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id):
 def confirm_choice():
     logger = logging.getLogger(__name__)
     confirm = input(
-        "!!WARNING!! [c]Confirm or [a]Abort Failing over the database: ")
+        "!!WARNING!! [c]Confirm or [a]Abort Failover: ")
     if confirm != 'c' and confirm != 'a':
         print("\n Invalid Option. Please Enter a Valid Option.")
         return confirm_choice()
@@ -182,9 +184,38 @@ def force_failover_rds(rds_client, vpc_id, az_name):
                     logger.info('Failover aborted')
 
 
+def force_failover_elasticache(elasticache_client, az_name):
+    logger = logging.getLogger(__name__)
+    replication_groups = elasticache_client.describe_replication_groups()
+    for replication in replication_groups['ReplicationGroups']:
+        if replication['AutomaticFailover'] == 'enabled':
+            # find if primary node in blackout AZ
+            for nodes in replication['NodeGroups']:
+                for node in nodes['NodeGroupMembers']:
+                    if node['CurrentRole'] == 'primary' and node['PreferredAvailabilityZone'] == az_name:
+                        print(node)
+                        ReplicationGroupId = replication['ReplicationGroupId']
+                        NodeGroupId = node['CacheNodeId']
+                        logger.info(
+                            'cluster with ReplicationGroupId %s and NodeGroupId %s found with primary node in %s',
+                            ReplicationGroupId,
+                            NodeGroupId,
+                            node['PreferredAvailabilityZone']
+                        )
+                        confirm = confirm_choice()
+                        if confirm == 'c':
+                            logger.info('Force automatic failover; no rollback possible')
+                            elasticache_client.test_failover(
+                                ReplicationGroupId=ReplicationGroupId,
+                                NodeGroupId=NodeGroupId
+                            )
+                        else:
+                            logger.info('Failover aborted')
+
+
 def rollback(ec2_client, save_for_rollback):
     logger = logging.getLogger(__name__)
-    logger.info('Rolling back original configuration ')
+    logger.info('Rolling back Network ACL to original configuration')
     # Rollback the initial association
     for nacl_ass_id, nacl_id in save_for_rollback:
         ec2_client.replace_network_acl_association(
@@ -202,7 +233,7 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     )
 
 
-def run(region, az_name, vpc_id, duration, failover_rds, log_level='INFO'):
+def run(region, az_name, vpc_id, duration, failover_rds, failover_elasticache, log_level='INFO'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
@@ -215,6 +246,10 @@ def run(region, az_name, vpc_id, duration, failover_rds, log_level='INFO'):
         rds_client = boto3.client('rds', region_name=region)
         force_failover_rds(rds_client, vpc_id, az_name)
 
+    if failover_elasticache:
+        elasticache_client = boto3.client('elasticache', region_name=region)
+        force_failover_elasticache(elasticache_client, az_name)
+
     time.sleep(duration)
     rollback(ec2_client, save_for_rollback)
     delete_chaos_nacl(ec2_client, chaos_nacl_id)
@@ -222,12 +257,14 @@ def run(region, az_name, vpc_id, duration, failover_rds, log_level='INFO'):
 
 def entry_point():
     args = get_arguments()
+    print(args)
     run(
         args.region,
         args.az_name,
         args.vpc_id,
         args.duration,
         args.failover_rds,
+        args.failover_elasticache,
         args.log_level
     )
 
