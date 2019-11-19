@@ -27,16 +27,14 @@ Use these scripts only if you understand what the code does
         --vpc-id VPC_ID       The VPC ID of choice (default: None)
         --az-name AZ_NAME     The name of the availability zone to blackout
                                 (default: None)
-        --duration DURATION   The duration, in seconds, of the blackout (default:
-                                60)
+        --duration DURATION   The duration, in seconds, of the blackout (default: 60)
         --failover-rds FAILOVER_RDS
-                                Failover RDS if master in the blackout subnet
+                              Failover RDS if master in AZ_NAME
                                 (default: False)
         --failover-elasticache FAILOVER_ELASTICACHE
-                                Failover Elasticache if primary in the blackout subnet
+                               Failover Elasticache if primary in AZ_NAME
                                 (default: False)
-        --log-level LOG_LEVEL
-                                Python log level. INFO, DEBUG, etc. (default: INFO)
+        --log-level LOG_LEVEL  Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
 
@@ -53,14 +51,12 @@ Use these scripts only if you understand what the code does
 
         optional arguments:
         -h, --help            show this help message and exit
-        --log-level LOG_LEVEL
-                                Python log level. INFO, DEBUG, etc. (default: INFO)
+        --log-level LOG_LEVEL Python log level. INFO, DEBUG, etc. (default: INFO)
         --region REGION       The AWS region of choice (default: eu-west-3)
         --az-name AZ_NAME     The name of the availability zone to blackout
                                 (default: eu-west-3a)
         --tag-name TAG_NAME   The name of the tag (default: SSMTag)
-        --tag-value TAG_VALUE
-                                The value of the tag (default: chaos-ready)
+        --tag-value TAG_VALUE The value of the tag (default: chaos-ready)
         --duration DURATION   Duration, in seconds, before restarting the instance
                                 (default: None)
     ```
