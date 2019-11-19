@@ -81,7 +81,7 @@ Use these scripts only if you understand what the code does
 1. Run the script with its console script:
 
    ```shell
-   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --failover-rds True
+   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --failover-rds True --failover-elasticache True
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    ```
 
@@ -97,7 +97,7 @@ Use these scripts only if you understand what the code does
 1. Run the script with its console script:
 
    ```shell
-   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60
+   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --failover-rds True --failover-elasticache True
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    ```
 
