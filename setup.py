@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             'script-fail-az=scripts.fail_az:entry_point',
             'script-stop-instance=scripts.stop_random_instance:entry_point',
+            'script-fail-rds=scripts.fail_rds:entry_point',
         ],
     },
     install_requires=requirements

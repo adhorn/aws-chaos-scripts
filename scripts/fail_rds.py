@@ -39,7 +39,7 @@ def setup_logging(log_level):
 
 def get_arguments():
     parser = argparse.ArgumentParser(
-        description='Force RDS Failover if master is in a particular AZ',
+        description='Force RDS failover if master is in a particular AZ or if database ID provided',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--region', type=str, required=True,
                         help='The AWS region of choice.')

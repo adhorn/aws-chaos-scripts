@@ -61,6 +61,28 @@ Use these scripts only if you understand what the code does
                                 (default: None)
     ```
 
+3. script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+
+    ```shell
+        ❯ script-fail-rds --help
+        usage: fail_rds.py [-h] --region REGION [--rds-id RDS_ID] [--vpc-id VPC_ID]
+                        [--az-name AZ_NAME] [--log-level LOG_LEVEL]
+
+        Force RDS failover if master is in a particular AZ or if database ID provided
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        --region REGION       The AWS region of choice. (default: None)
+        --rds-id RDS_ID       The Id of the RDS database to failover. (default:
+                                None)
+        --vpc-id VPC_ID       The VPC ID of where the DB is. (default: None)
+        --az-name AZ_NAME     The name of the AZ where the DB master is. (default:
+                                None)
+        --log-level LOG_LEVEL
+                                Python log level. INFO, DEBUG, etc. (default: INFO)
+    ```
+
+
 ## Building and using for production
 
 1. Build a [wheel][wheel].
@@ -87,6 +109,8 @@ Use these scripts only if you understand what the code does
    ```shell
    script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --failover-rds True --failover-elasticache True
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
+   script-fail-rds --region eu-west-3 --rds-id database-1
+   script-fail-rds --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
    ```
 
 
@@ -103,6 +127,8 @@ Use these scripts only if you understand what the code does
    ```shell
    python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --failover-rds True --failover-elasticache True
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
+   python scripts/fail_rds.py --region eu-west-3 --rds-id database-1
+   python scripts/fail_rds.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
    ```
 
 
