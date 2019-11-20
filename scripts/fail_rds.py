@@ -11,7 +11,7 @@ When you force a failover of your DB instance, Amazon RDS
 automatically switches to a standby replica in another Availability
 Zone, and updates the DNS record for the DB instance to point to the
 standby DB instance. As a result, you need to clean up and re-establish
-any existing connections to your DB instance. 
+any existing connections to your DB instance.
 
 Important: When you force a failover from one Availability Zone to another
 when you reboot the Availability Zone change might not be reflected

@@ -61,11 +61,12 @@ Use these scripts only if you understand what the code does
                                 (default: None)
     ```
 
-3. script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+3. script-fail-rds: force RDS failover if master is in a particular AZ or if database ID provided. 
 
     ```shell
         ❯ script-fail-rds --help
-        usage: fail_rds.py [-h] --region REGION [--rds-id RDS_ID] [--vpc-id VPC_ID]
+        script-fail-rds [-h] --region REGION 
+                        [--rds-id RDS_ID] [--vpc-id VPC_ID]
                         [--az-name AZ_NAME] [--log-level LOG_LEVEL]
 
         Force RDS failover if master is in a particular AZ or if database ID provided
@@ -82,6 +83,30 @@ Use these scripts only if you understand what the code does
                                 Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
+4. script-fail-elasticache: force elasticache failover if primary node is in a particular AZ or if cluster name provided. 
+
+    ```shell
+        ❯ script-fail-elasticache --help
+        usage: script-fail-elasticache  [-h] --region REGION
+                                        [--elasticache-cluster-name ELASTICACHE_CLUSTER_NAME]
+                                        [--vpc-id VPC_ID] [--az-name AZ_NAME]
+                                        [--log-level LOG_LEVEL]
+
+        Force ElastiCache failover if master is in a particular AZ or if master node
+        ID provided
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        --region REGION       The AWS region of choice. (default: None)
+        --elasticache-cluster-name ELASTICACHE_CLUSTER_NAME
+                                The Id of the RDS database to failover. (default:
+                                None)
+        --vpc-id VPC_ID       The VPC ID of where the DB is. (default: None)
+        --az-name AZ_NAME     The name of the AZ where the DB master is. (default:
+                                None)
+        --log-level LOG_LEVEL
+                                Python log level. INFO, DEBUG, etc. (default: INFO)
+    ```
 
 ## Building and using for production
 
@@ -111,6 +136,8 @@ Use these scripts only if you understand what the code does
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    script-fail-rds --region eu-west-3 --rds-id database-1
    script-fail-rds --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
+   script-fail-elasticache --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
+   script-fail-elasticache --region eu-west-3 --elasticache-cluster-name chaoscluster
    ```
 
 
@@ -129,6 +156,8 @@ Use these scripts only if you understand what the code does
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    python scripts/fail_rds.py --region eu-west-3 --rds-id database-1
    python scripts/fail_rds.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
+   python scripts/fail_elasticache.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
+   python scripts/fail_elasticache.py --region eu-west-3 --elasticache-cluster-name chaoscluster
    ```
 
 
