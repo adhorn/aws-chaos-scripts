@@ -36,6 +36,8 @@ def get_arguments():
                         help='The name of the availability zone to blackout')
     parser.add_argument('--duration', type=int, default=60,
                         help='The duration, in seconds, of the blackout')
+    parser.add_argument('--limit-asg', type=bool, default=False,
+                        help='Remove "failed" AZ from Auto Scaling Group (ASG)')
     parser.add_argument('--failover-rds', type=bool, default=False,
                         help='Failover RDS if master in the blackout subnet')
     parser.add_argument('--failover-elasticache', type=bool, default=False,
@@ -265,8 +267,8 @@ def rollback(ec2_client, save_for_rollback, autoscaling_client, original_asg):
             AssociationId=nacl_ass_id,
             NetworkAclId=nacl_id
         )
-    logger.info('Rolling back AutoScalingGroup to original configuration')
     if original_asg is not None:
+        logger.info('Rolling back AutoScalingGroup to original configuration')
         asg_name = original_asg['AutoScalingGroupName']
         asg_subnets = original_asg['VPCZoneIdentifier'].split(',')
         vpczoneidentifier = ",".join(asg_subnets)
@@ -282,7 +284,7 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     )
 
 
-def run(region, az_name, vpc_id, duration, failover_rds, failover_elasticache, log_level='INFO'):
+def run(region, az_name, vpc_id, duration, limit_asg, failover_rds, failover_elasticache, log_level='INFO'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
@@ -293,15 +295,20 @@ def run(region, az_name, vpc_id, duration, failover_rds, failover_elasticache, l
     nacl_ids = get_nacls_to_chaos(ec2_client, subnets_to_chaos)
 
     # Limit AutoScalingGroup to no longer include failed AZ
-    original_asg = limit_auto_scaling(autoscaling_client, subnets_to_chaos)
+    if limit_asg:
+        original_asg = limit_auto_scaling(autoscaling_client, subnets_to_chaos)
+    else:
+        original_asg = None
 
     # Blackhole networking to EC2 instances in failed AZ
     save_for_rollback = apply_chaos_config(ec2_client, nacl_ids, chaos_nacl_id)
 
+    # Fail-over RDS if in the "failed" AZ
     if failover_rds:
         rds_client = boto3.client('rds', region_name=region)
         force_failover_rds(rds_client, vpc_id, az_name)
 
+    # Fail-over Elasticache if in the "failed" AZ
     if failover_elasticache:
         elasticache_client = boto3.client('elasticache', region_name=region)
         force_failover_elasticache(elasticache_client, az_name)
@@ -319,6 +326,7 @@ def entry_point():
         args.az_name,
         args.vpc_id,
         args.duration,
+        args.limit_asg,
         args.failover_rds,
         args.failover_elasticache,
         args.log_level
