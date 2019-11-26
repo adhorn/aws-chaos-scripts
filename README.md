@@ -13,7 +13,8 @@ Use these scripts only if you understand what the code does
      ```shell
         ❯ script-fail-az --help
         usage: script-fail-az   [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
-                                [--duration DURATION] [--failover-rds FAILOVER_RDS]
+                                [--duration DURATION]  [--limit-asg LIMIT_ASG]
+                                [--failover-rds FAILOVER_RDS]
                                 [--failover-elasticache FAILOVER_ELASTICACHE]
                                 [--log-level LOG_LEVEL]
 
@@ -27,6 +28,9 @@ Use these scripts only if you understand what the code does
         --az-name AZ_NAME     The name of the availability zone to blackout
                                 (default: None)
         --duration DURATION   The duration, in seconds, of the blackout (default: 60)
+        --limit-asg LIMIT_ASG
+                              Remove "failed" AZ from Auto Scaling Group (ASG)
+                              (default: False)
         --failover-rds FAILOVER_RDS
                               Failover RDS if master in AZ_NAME
                                 (default: False)
@@ -136,7 +140,7 @@ You have two options. Choose _**one**_ of the options below
 1. Run the script with its console script:
 
    ```shell
-   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --failover-rds True --failover-elasticache True
+   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    script-fail-rds --region eu-west-3 --rds-id database-1
    script-fail-rds --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
@@ -155,7 +159,7 @@ You have two options. Choose _**one**_ of the options below
 1. Run the script with its console script:
 
    ```shell
-   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --failover-rds True --failover-elasticache True
+   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    python scripts/fail_rds.py --region eu-west-3 --rds-id database-1
    python scripts/fail_rds.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
