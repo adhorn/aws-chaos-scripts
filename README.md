@@ -3,18 +3,18 @@
 ⚠️USE AT YOUR OWN RISK⚠️
 
 Using these scripts may create an unreasonable risk. If you choose to use the scripts provided here in your own activities, you do so at your own risk.
-None of the authors or contributors, or anyone else connected with these scripts, in any way whatsoever, can be responsible for your use of the scripts contained in this repository. 
+None of the authors or contributors, or anyone else connected with these scripts, in any way whatsoever, can be responsible for your use of the scripts contained in this repository.
 Use these scripts only if you understand what the code does
 
-
-## Collection of python scripts to inject failure in the AWS Infrastructure.
+## Collection of python scripts to inject failure in the AWS Infrastructure
 
 1. script-fail-az: simulate the lose of an Availability Zone (AZ) in a VPC.
 
      ```shell
         ❯ script-fail-az --help
         usage: script-fail-az   [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
-                                [--duration DURATION] [--failover-rds FAILOVER_RDS]
+                                [--duration DURATION]  [--limit-asg LIMIT_ASG]
+                                [--failover-rds FAILOVER_RDS]
                                 [--failover-elasticache FAILOVER_ELASTICACHE]
                                 [--log-level LOG_LEVEL]
 
@@ -28,6 +28,9 @@ Use these scripts only if you understand what the code does
         --az-name AZ_NAME     The name of the availability zone to blackout
                                 (default: None)
         --duration DURATION   The duration, in seconds, of the blackout (default: 60)
+        --limit-asg LIMIT_ASG
+                              Remove "failed" AZ from Auto Scaling Group (ASG)
+                              (default: False)
         --failover-rds FAILOVER_RDS
                               Failover RDS if master in AZ_NAME
                                 (default: False)
@@ -37,9 +40,7 @@ Use these scripts only if you understand what the code does
         --log-level LOG_LEVEL  Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
-
-
-2. script-stop-instance: randomly kill an instance in a particular AZ if proper tags. 
+2. script-stop-instance: randomly kill an instance in a particular AZ if proper tags.
 
     ```shell
         ❯ script-stop-instance --help
@@ -61,11 +62,11 @@ Use these scripts only if you understand what the code does
                                 (default: None)
     ```
 
-3. script-fail-rds: force RDS failover if master is in a particular AZ or if database ID provided. 
+3. script-fail-rds: force RDS failover if master is in a particular AZ or if database ID provided.
 
     ```shell
         ❯ script-fail-rds --help
-        script-fail-rds [-h] --region REGION 
+        script-fail-rds [-h] --region REGION
                         [--rds-id RDS_ID] [--vpc-id VPC_ID]
                         [--az-name AZ_NAME] [--log-level LOG_LEVEL]
 
@@ -83,7 +84,7 @@ Use these scripts only if you understand what the code does
                                 Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
-4. script-fail-elasticache: force elasticache failover if primary node is in a particular AZ or if cluster name provided. 
+4. script-fail-elasticache: force elasticache failover if primary node is in a particular AZ or if cluster name provided.
 
     ```shell
         ❯ script-fail-elasticache --help
@@ -108,7 +109,14 @@ Use these scripts only if you understand what the code does
                                 Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
-## Building and using for production
+## Install and build the scripts
+
+You have two options. Choose _**one**_ of the options below
+
+* Building and using for production using Python Wheel
+* Building and using for dev or test (does not require Python Wheel)
+
+### Building and using for production
 
 1. Build a [wheel][wheel].
 
@@ -117,10 +125,10 @@ Use these scripts only if you understand what the code does
    python setup.py bdist_wheel
    ```
 
-1. Distribute the wheel file from the `dist` folder:
+1. The wheel file `chaos_aws-1.0.0-py3-none-any.whl` is in the the `dist` folder:
 
    ```shell
-   dist/chaos_aws-1.0.0-py3-none-any.whl
+   cd dist
    ```
 
 1. Install the wheel with pip.
@@ -132,7 +140,7 @@ Use these scripts only if you understand what the code does
 1. Run the script with its console script:
 
    ```shell
-   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --failover-rds True --failover-elasticache True
+   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    script-fail-rds --region eu-west-3 --rds-id database-1
    script-fail-rds --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
@@ -140,8 +148,7 @@ Use these scripts only if you understand what the code does
    script-fail-elasticache --region eu-west-3 --elasticache-cluster-name chaoscluster
    ```
 
-
-## Building and using for dev or test
+### Building and using for dev or test
 
 1. Install requirements
 
@@ -152,13 +159,12 @@ Use these scripts only if you understand what the code does
 1. Run the script with its console script:
 
    ```shell
-   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --failover-rds True --failover-elasticache True
+   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    python scripts/fail_rds.py --region eu-west-3 --rds-id database-1
    python scripts/fail_rds.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
    python scripts/fail_elasticache.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
    python scripts/fail_elasticache.py --region eu-west-3 --elasticache-cluster-name chaoscluster
    ```
-
 
 [wheel]: http://pythonwheels.com
