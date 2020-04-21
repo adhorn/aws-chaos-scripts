@@ -2,6 +2,7 @@
 #IDE and other build tools
 .DS_Store
 .vscode
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
