@@ -51,6 +51,8 @@ def get_arguments():
                         help='The name of the AZ where the DB master is.')
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')
+    parser.add_argument('--profile', type=str, default='default',
+                        help='AWS credential profile to use')
 
     return parser.parse_args()
 
@@ -124,11 +126,12 @@ def force_failover_rds_id(rds_client, rds_id):
                 logger.info('Failover aborted')
 
 
-def run(region, rds_id=None, az_name=None, vpc_id=None, log_level='INFO'):
+def run(region, rds_id=None, az_name=None, vpc_id=None, log_level='INFO', profile='default'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up rds client for region %s ', region)
-    rds_client = boto3.client('rds', region_name=region)
+    session = boto3.Session(profile_name=profile)
+    rds_client = session.client('rds', region_name=region)
     if rds_id:
         response = force_failover_rds_id(rds_client, rds_id)
     else:
@@ -144,7 +147,8 @@ def entry_point():
         args.rds_id,
         args.az_name,
         args.vpc_id,
-        args.log_level
+        args.log_level,
+        args.profile
     )
 
 

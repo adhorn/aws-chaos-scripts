@@ -34,7 +34,7 @@ def get_arguments():
                         help='The VPC ID of choice')
     parser.add_argument('--az-name', type=str, required=True,
                         help='The name of the availability zone to blackout')
-    parser.add_argument('--duration', type=int, default=60,
+    parser.add_argument('--duration', type=int,
                         help='The duration, in seconds, of the blackout')
     parser.add_argument('--limit-asg', type=bool, default=False,
                         help='Remove "failed" AZ from Auto Scaling Group (ASG)')
@@ -44,6 +44,9 @@ def get_arguments():
                         help='Failover Elasticache if primary in the blackout subnet')
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')
+    parser.add_argument('--profile', type=str, default='default',
+                        help='AWS credential profile to use')
+
     return parser.parse_args()
 
 
@@ -65,7 +68,7 @@ def create_chaos_nacl(ec2_client, vpc_id):
         Tags=[
             {
                 'Key': 'Name',
-                'Value': 'chaos-kong'
+                'Value': 'failover-testing-chaos-nacl'
             },
         ]
     )
@@ -284,12 +287,13 @@ def delete_chaos_nacl(ec2_client, chaos_nacl_id):
     )
 
 
-def run(region, az_name, vpc_id, duration, limit_asg, failover_rds, failover_elasticache, log_level='INFO'):
+def run(region, az_name, vpc_id, duration, limit_asg, failover_rds, failover_elasticache, log_level='INFO', profile='default'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
-    ec2_client = boto3.client('ec2', region_name=region)
-    autoscaling_client = boto3.client('autoscaling', region_name=region)
+    session = boto3.Session(profile_name=profile)
+    ec2_client = session.client('ec2', region_name=region)
+    autoscaling_client = session.client('autoscaling', region_name=region)
     chaos_nacl_id = create_chaos_nacl(ec2_client, vpc_id)
     subnets_to_chaos = get_subnets_to_chaos(ec2_client, vpc_id, az_name)
     nacl_ids = get_nacls_to_chaos(ec2_client, subnets_to_chaos)
@@ -305,15 +309,19 @@ def run(region, az_name, vpc_id, duration, limit_asg, failover_rds, failover_ela
 
     # Fail-over RDS if in the "failed" AZ
     if failover_rds:
-        rds_client = boto3.client('rds', region_name=region)
+        rds_client = session.client('rds', region_name=region)
         force_failover_rds(rds_client, vpc_id, az_name)
 
     # Fail-over Elasticache if in the "failed" AZ
     if failover_elasticache:
-        elasticache_client = boto3.client('elasticache', region_name=region)
+        elasticache_client = session.client('elasticache', region_name=region)
         force_failover_elasticache(elasticache_client, az_name)
 
-    time.sleep(duration)
+    if duration:
+        time.sleep(duration)
+    else:
+        input("Press Enter to rollback...")
+
     rollback(ec2_client, save_for_rollback,  autoscaling_client, original_asg)
     delete_chaos_nacl(ec2_client, chaos_nacl_id)
 
@@ -329,7 +337,8 @@ def entry_point():
         args.limit_asg,
         args.failover_rds,
         args.failover_elasticache,
-        args.log_level
+        args.log_level,
+        args.profile
     )
 
 

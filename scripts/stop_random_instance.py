@@ -38,6 +38,9 @@ def get_arguments():
                         help='The value of the tag')
     parser.add_argument('--duration', type=int,
                         help='Duration, in seconds, before restarting the instance')
+    parser.add_argument('--profile', type=str, default='default',
+                        help='AWS credential profile to use')
+
     return parser.parse_args()
 
 
@@ -93,17 +96,20 @@ def rollback(ec2_client, instance_id):
     )
 
 
-def run(region, az_name, tag_name, tag_value, duration, log_level='INFO'):
+def run(region, az_name, tag_name, tag_value, duration, log_level='INFO', profile='default'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up ec2 client for region %s ', region)
-    ec2_client = boto3.client('ec2', region_name=region)
+    session = boto3.Session(profile_name=profile)
+    ec2_client = session.client('ec2', region_name=region)
     instance_id = stop_random_instance(
         ec2_client, az_name, tag_name, tag_value)
 
     if instance_id and duration:
         time.sleep(duration)
-        rollback(ec2_client, instance_id)
+    else:
+        input("Press Enter to rollback...")
+    rollback(ec2_client, instance_id)
 
 
 def entry_point():
@@ -114,7 +120,8 @@ def entry_point():
         args.tag_name,
         args.tag_value,
         args.duration,
-        args.log_level
+        args.log_level,
+        args.profile
     )
 
 

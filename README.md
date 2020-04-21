@@ -13,6 +13,7 @@ Use these scripts only if you understand what the code does
      ```shell
         ❯ script-fail-az --help
         usage: script-fail-az   [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
+                                [--profile PROFILE_NAME]
                                 [--duration DURATION]  [--limit-asg LIMIT_ASG]
                                 [--failover-rds FAILOVER_RDS]
                                 [--failover-elasticache FAILOVER_ELASTICACHE]
@@ -45,6 +46,7 @@ Use these scripts only if you understand what the code does
     ```shell
         ❯ script-stop-instance --help
         usage: script-stop-instance [-h] [--log-level LOG_LEVEL] [--region REGION]
+                                    [--profile PROFILE_NAME]
                                     [--az-name AZ_NAME] [--tag-name TAG_NAME]
                                     [--tag-value TAG_VALUE] [--duration DURATION]
 
@@ -67,6 +69,7 @@ Use these scripts only if you understand what the code does
     ```shell
         ❯ script-fail-rds --help
         script-fail-rds [-h] --region REGION
+                        [--profile PROFILE_NAME]
                         [--rds-id RDS_ID] [--vpc-id VPC_ID]
                         [--az-name AZ_NAME] [--log-level LOG_LEVEL]
 
@@ -89,6 +92,7 @@ Use these scripts only if you understand what the code does
     ```shell
         ❯ script-fail-elasticache --help
         usage: script-fail-elasticache  [-h] --region REGION
+                                        [--profile PROFILE_NAME]
                                         [--elasticache-cluster-name ELASTICACHE_CLUSTER_NAME]
                                         [--vpc-id VPC_ID] [--az-name AZ_NAME]
                                         [--log-level LOG_LEVEL]

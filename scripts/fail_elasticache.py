@@ -34,6 +34,8 @@ def get_arguments():
                         help='The name of the AZ where the DB master is.')
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')
+    parser.add_argument('--profile', type=str, default='default',
+                        help='AWS credential profile to use')
 
     return parser.parse_args()
 
@@ -122,11 +124,12 @@ def force_failover_elasticache(
                             logger.info('Failover aborted')
 
 
-def run(region, elasticache_cluster_name=None, az_name=None, vpc_id=None, log_level='INFO'):
+def run(region, elasticache_cluster_name=None, az_name=None, vpc_id=None, log_level='INFO', profile='default'):
     setup_logging(log_level)
     logger = logging.getLogger(__name__)
     logger.info('Setting up elasticache client for region %s ', region)
-    elasticache_client = boto3.client('elasticache', region_name=region)
+    session = boto3.Session(profile_name=profile)
+    elasticache_client = session.client('elasticache', region_name=region)
     if elasticache_cluster_name:
         force_failover_elasticache(
             elasticache_client, elasticache_cluster_name)
@@ -142,7 +145,8 @@ def entry_point():
         args.elasticache_cluster_name,
         args.az_name,
         args.vpc_id,
-        args.log_level
+        args.log_level,
+        args.profile
     )
 
 
