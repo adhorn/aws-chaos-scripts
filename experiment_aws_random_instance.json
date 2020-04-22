@@ -1,0 +1,79 @@
+{
+    "version": "1.0.0",
+    "title": "What is the impact of randomly terminating an instance in an AZ",
+    "description": "terminating EC2 instance at random should not impact my app from running",
+    "tags": ["ec2"],
+    "configuration": {
+        "aws_region": "eu-west-1"
+    },
+    "steady-state-hypothesis": {
+        "title": "more than 0 instance in region",
+        "probes": [
+            {
+              "provider": {
+                "module": "chaosaws.ec2.probes",
+                "type": "python",
+                "func": "count_instances",
+                "arguments": {
+                  "filters": [
+                    {
+                        "Name": "availability-zone",
+                        "Values": ["eu-west-1b"]
+                    },
+                    {
+                        "Name": "tag:SSMTag",
+                        "Values": ["chaos-ready"]
+                    }
+                  ]
+                }
+              },
+              "type": "probe",
+              "name": "count-instances",
+              "tolerance": [0, 2]
+            }
+        ]
+    },
+    "method": [
+        {
+            "type": "action",
+            "name": "stop-random-instance",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2.actions",
+                "func": "stop_instance",
+                "arguments": {
+                    "az": "eu-west-1c",
+                    "filters": [
+                        {
+                            "Name": "tag:SSMTag",
+                            "Values": ["chaos-ready"]
+                        }
+                    ]
+                }
+            },
+            "pauses": {
+               "after": 20
+             }
+        }
+    ],
+    "rollbacks": [
+        {
+            "type": "action",
+            "name": "start-all-instances",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2.actions",
+                "func": "start_instances",
+                "arguments": {
+                    "az": "eu-west-1c"
+                 },
+               "filters": [
+                    {
+                        "Name": "tag:SSMTag",
+                        "Values": ["chaos-ready"]
+                    }
+                ]
+            }
+        }
+    ]
+}
