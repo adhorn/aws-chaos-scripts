@@ -43,11 +43,11 @@ def get_arguments():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--region', type=str, required=True,
                         help='The AWS region of choice.')
-    parser.add_argument('--rds-id', type=str, default=None,
+    parser.add_argument('--rds-id', type=str, required=True,
                         help='The Id of the RDS database to failover.')
-    parser.add_argument('--vpc-id', type=str, default=None,
+    parser.add_argument('--vpc-id', type=str, required=True,
                         help='The VPC ID of where the DB is.')
-    parser.add_argument('--az-name', type=str, default=None,
+    parser.add_argument('--az-name', type=str, required=True,
                         help='The name of the AZ where the DB master is.')
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')
