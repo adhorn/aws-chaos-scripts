@@ -13,10 +13,8 @@ Use these scripts only if you understand what the code does
      ```shell
         ❯ script-fail-az --help
         usage: script-fail-az   [-h] --region REGION --vpc-id VPC_ID --az-name AZ_NAME
-                                [--duration DURATION]  [--limit-asg LIMIT_ASG]
-                                [--failover-rds FAILOVER_RDS]
-                                [--failover-elasticache FAILOVER_ELASTICACHE]
-                                [--log-level LOG_LEVEL]
+                                [--duration DURATION]  [--limit-asg] [--failover-rds]
+                                [--failover-elasticache] [--log-level LOG_LEVEL]
 
         Simulate AZ failure: associate subnet(s) with a Chaos NACL that deny ALL
         Ingress and Egress traffic - blackhole
@@ -26,18 +24,18 @@ Use these scripts only if you understand what the code does
         --region REGION       The AWS region of choice (default: None)
         --vpc-id VPC_ID       The VPC ID of choice (default: None)
         --az-name AZ_NAME     The name of the availability zone to blackout
-                                (default: None)
-        --duration DURATION   The duration, in seconds, of the blackout (default: 60)
-        --limit-asg LIMIT_ASG
-                              Remove "failed" AZ from Auto Scaling Group (ASG)
+                              (default: None)
+        --duration DURATION   The duration, in seconds, of the blackout (default:
+                              60)
+        --limit-asg           Remove "failed" AZ from Auto Scaling Group (ASG)
                               (default: False)
-        --failover-rds FAILOVER_RDS
-                              Failover RDS if master in AZ_NAME
-                                (default: False)
-        --failover-elasticache FAILOVER_ELASTICACHE
-                               Failover Elasticache if primary in AZ_NAME
-                                (default: False)
-        --log-level LOG_LEVEL  Python log level. INFO, DEBUG, etc. (default: INFO)
+        --failover-rds        Failover RDS if master in the blackout subnet
+                              (default: False)
+        --failover-elasticache
+                              Failover Elasticache if primary in the blackout subnet
+                              (default: False)
+        --log-level LOG_LEVEL
+                              Python log level. INFO, DEBUG, etc. (default: INFO)
     ```
 
 2. script-stop-instance: randomly kill an instance in a particular AZ if proper tags.
@@ -140,7 +138,7 @@ You have two options. Choose _**one**_ of the options below
 1. Run the script with its console script:
 
    ```shell
-   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
+   script-fail-az --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3a --duration 60 --limit-asg --failover-rds --failover-elasticache
    script-stop-instance --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    script-fail-rds --region eu-west-3 --rds-id database-1
    script-fail-rds --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c
@@ -159,7 +157,7 @@ You have two options. Choose _**one**_ of the options below
 1. Run the script with its console script:
 
    ```shell
-   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --limit-asg True --failover-rds True --failover-elasticache True
+   python scripts/fail_az.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c --duration 60 --limit-asg --failover-rds --failover-elasticache
    python scripts/stop_random_instance.py --region eu-west-3 --az-name eu-west-3a --tag-name "chaos" --tag-value "chaos-ready"
    python scripts/fail_rds.py --region eu-west-3 --rds-id database-1
    python scripts/fail_rds.py --region eu-west-3 --vpc-id vpc-2719dc4e --az-name eu-west-3c

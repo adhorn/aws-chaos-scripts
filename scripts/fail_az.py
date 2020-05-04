@@ -36,11 +36,11 @@ def get_arguments():
                         help='The name of the availability zone to blackout')
     parser.add_argument('--duration', type=int, default=60,
                         help='The duration, in seconds, of the blackout')
-    parser.add_argument('--limit-asg', type=bool, default=False,
+    parser.add_argument('--limit-asg', default=False, action='store_true',
                         help='Remove "failed" AZ from Auto Scaling Group (ASG)')
-    parser.add_argument('--failover-rds', type=bool, default=False,
+    parser.add_argument('--failover-rds', default=False, action='store_true',
                         help='Failover RDS if master in the blackout subnet')
-    parser.add_argument('--failover-elasticache', type=bool, default=False,
+    parser.add_argument('--failover-elasticache', default=False, action='store_true',
                         help='Failover Elasticache if primary in the blackout subnet')
     parser.add_argument('--log-level', type=str, default='INFO',
                         help='Python log level. INFO, DEBUG, etc.')
