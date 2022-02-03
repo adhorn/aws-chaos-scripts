@@ -1,4 +1,6 @@
-## Disclaimer
+## DEPRECATED in favor of AWS FIS (https://docs.aws.amazon.com/fis/latest/userguide/fis-actions-reference.html#fis-actions-reference-fis) 
+
+All scripts here have been ported to FIS - See https://github.com/adhorn/aws-fis-templates-cdk
 
 ⚠️USE AT YOUR OWN RISK⚠️
 
